@@ -33,6 +33,7 @@
  */
 package fr.paris.lutece.plugins.identityimport.web.service;
 
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
@@ -86,11 +87,14 @@ public class BatchImportService
      *            the creation or update request
      * @param strClientCode
      *            the client code
+     * @param author
+     *            the author of the request
      * @return the reference of the created or update batch and an execution status.
      */
-    public BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode ) throws IdentityStoreException
+    public BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode, final RequestAuthor author )
+            throws IdentityStoreException
     {
-        return this._transportProvider.importBatch( request, strClientCode );
+        return this._transportProvider.importBatch( request, strClientCode, author );
     }
 
 }

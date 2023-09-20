@@ -33,9 +33,10 @@
  */
 package fr.paris.lutece.plugins.identityimport.web.rs.service;
 
-import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider;
 import fr.paris.lutece.plugins.identityimport.web.service.IBatchImportTransportProvider;
+import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.BatchRequestValidator;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.util.Constants;
@@ -81,10 +82,10 @@ public class BatchImportTransportRest extends AbstractTransportRest implements I
     }
 
     @Override
-    public BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode ) throws IdentityStoreException
+    public BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode, final RequestAuthor author )
+            throws IdentityStoreException
     {
-        BatchRequestValidator.instance( ).checkOrigin( request.getOrigin( ) );
-        BatchRequestValidator.instance( ).checkClientApplication( strClientCode );
+        this.checkCommonHeaders( strClientCode, author );
 
         final Map<String, String> mapHeadersRequest = new HashMap<>( );
         mapHeadersRequest.put( Constants.PARAM_CLIENT_CODE, strClientCode );

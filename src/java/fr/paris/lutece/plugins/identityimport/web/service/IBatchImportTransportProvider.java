@@ -33,6 +33,8 @@
  */
 package fr.paris.lutece.plugins.identityimport.web.service;
 
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.IdentityRequestValidator;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
@@ -51,7 +53,15 @@ public interface IBatchImportTransportProvider
      *            the creation or update request
      * @param strClientCode
      *            the client code
+     * @param author
+     *            the author of the request
      * @return the reference of the created or update batch and an execution status.
      */
-    BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode ) throws IdentityStoreException;
+    BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode, final RequestAuthor author ) throws IdentityStoreException;
+
+    default void checkCommonHeaders( final String clientCode, final RequestAuthor author ) throws IdentityStoreException
+    {
+        IdentityRequestValidator.instance( ).checkAuthor( author );
+        IdentityRequestValidator.instance( ).checkClientCode( clientCode );
+    }
 }
