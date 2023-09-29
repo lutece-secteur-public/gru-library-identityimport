@@ -89,11 +89,11 @@ public class BatchImportTransportRest extends AbstractTransportRest implements I
 
         final Map<String, String> mapHeadersRequest = new HashMap<>( );
         mapHeadersRequest.put( Constants.PARAM_CLIENT_CODE, strClientCode );
+        mapHeadersRequest.put( Constants.PARAM_AUTHOR_NAME, author.getName() );
+        mapHeadersRequest.put( Constants.PARAM_AUTHOR_TYPE, author.getType().name() );
         final Map<String, String> mapParams = new HashMap<>( );
 
-        final BatchImportResponse response = _httpTransport.doPostJSON( _strIdentityStoreImportEndPoint + Constants.VERSION_PATH_V3 + Constants.BATCH_PATH,
-                mapParams, mapHeadersRequest, request, BatchImportResponse.class, _mapper );
-
-        return response;
+        return _httpTransport.doPostJSON( _strIdentityStoreImportEndPoint + Constants.VERSION_PATH_V3 + Constants.BATCH_PATH, mapParams, mapHeadersRequest,
+                request, BatchImportResponse.class, _mapper );
     }
 }
