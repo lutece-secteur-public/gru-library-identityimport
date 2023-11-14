@@ -37,6 +37,8 @@ import fr.paris.lutece.plugins.identitystore.v3.web.rs.IdentityRequestValidator;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatusRequest;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatusResponse;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
 
 /**
@@ -58,6 +60,18 @@ public interface IBatchImportTransportProvider
      * @return the reference of the created or update batch and an execution status.
      */
     BatchImportResponse importBatch( final BatchImportRequest request, final String strClientCode, final RequestAuthor author ) throws IdentityStoreException;
+
+    /**
+     * Get the status of the batch
+     * @param request
+     *            the request containing the reference of the batch and the desired mode
+     * @param strClientCode
+     *            the client code
+     * @param author
+     *            the author
+     * @return the status
+     */
+    BatchStatusResponse getBatchStatus(final BatchStatusRequest request, final String strClientCode, final RequestAuthor author) throws IdentityStoreException;
 
     default void checkCommonHeaders( final String clientCode, final RequestAuthor author ) throws IdentityStoreException
     {

@@ -39,6 +39,8 @@ import fr.paris.lutece.plugins.identitystore.v3.web.rs.BatchRequestValidator;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatusRequest;
+import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatusResponse;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.util.Constants;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
 import org.apache.log4j.Logger;
@@ -95,5 +97,22 @@ public class BatchImportTransportRest extends AbstractTransportRest implements I
 
         return _httpTransport.doPostJSON( _strIdentityStoreImportEndPoint + Constants.VERSION_PATH_V3 + Constants.BATCH_PATH, mapParams, mapHeadersRequest,
                 request, BatchImportResponse.class, _mapper );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BatchStatusResponse getBatchStatus(final BatchStatusRequest request, final String strClientCode, final RequestAuthor author) throws IdentityStoreException {
+        this.checkCommonHeaders( strClientCode, author );
+
+        final Map<String, String> mapHeadersRequest = new HashMap<>( );
+        mapHeadersRequest.put( Constants.PARAM_CLIENT_CODE, strClientCode );
+        mapHeadersRequest.put( Constants.PARAM_AUTHOR_NAME, author.getName( ) );
+        mapHeadersRequest.put( Constants.PARAM_AUTHOR_TYPE, author.getType( ).name( ) );
+        final Map<String, String> mapParams = new HashMap<>( );
+
+        return _httpTransport.doPostJSON( _strIdentityStoreImportEndPoint + Constants.VERSION_PATH_V3 + Constants.BATCH_PATH + Constants.BATCH_STATUS_PATH,
+                                          mapParams, mapHeadersRequest, request, BatchStatusResponse.class, _mapper );
     }
 }
