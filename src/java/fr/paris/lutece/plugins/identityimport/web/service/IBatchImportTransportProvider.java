@@ -63,6 +63,7 @@ public interface IBatchImportTransportProvider
 
     /**
      * Get the status of the batch
+     * 
      * @param request
      *            the request containing the reference of the batch and the desired mode
      * @param strClientCode
@@ -71,7 +72,8 @@ public interface IBatchImportTransportProvider
      *            the author
      * @return the status
      */
-    BatchStatusResponse getBatchStatus(final BatchStatusRequest request, final String strClientCode, final RequestAuthor author) throws IdentityStoreException;
+    BatchStatusResponse getBatchStatus( final BatchStatusRequest request, final String strClientCode, final RequestAuthor author )
+            throws IdentityStoreException;
 
     default void checkCommonHeaders( final String clientCode, final RequestAuthor author ) throws IdentityStoreException
     {

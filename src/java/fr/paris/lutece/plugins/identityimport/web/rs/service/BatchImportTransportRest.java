@@ -103,7 +103,9 @@ public class BatchImportTransportRest extends AbstractTransportRest implements I
      * {@inheritDoc}
      */
     @Override
-    public BatchStatusResponse getBatchStatus(final BatchStatusRequest request, final String strClientCode, final RequestAuthor author) throws IdentityStoreException {
+    public BatchStatusResponse getBatchStatus( final BatchStatusRequest request, final String strClientCode, final RequestAuthor author )
+            throws IdentityStoreException
+    {
         this.checkCommonHeaders( strClientCode, author );
 
         final Map<String, String> mapHeadersRequest = new HashMap<>( );
@@ -113,6 +115,6 @@ public class BatchImportTransportRest extends AbstractTransportRest implements I
         final Map<String, String> mapParams = new HashMap<>( );
 
         return _httpTransport.doPostJSON( _strIdentityStoreImportEndPoint + Constants.VERSION_PATH_V3 + Constants.BATCH_PATH + Constants.BATCH_STATUS_PATH,
-                                          mapParams, mapHeadersRequest, request, BatchStatusResponse.class, _mapper );
+                mapParams, mapHeadersRequest, request, BatchStatusResponse.class, _mapper );
     }
 }

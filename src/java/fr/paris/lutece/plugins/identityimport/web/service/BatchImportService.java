@@ -101,6 +101,7 @@ public class BatchImportService
 
     /**
      * Get the status of the batch
+     * 
      * @param request
      *            the request containing the reference of the batch and the desired mode
      * @param strClientCode
@@ -109,8 +110,10 @@ public class BatchImportService
      *            the author
      * @return the status
      */
-    public BatchStatusResponse getBatchStatus(final BatchStatusRequest request, final String strClientCode, final RequestAuthor author) throws IdentityStoreException {
-        return this._transportProvider.getBatchStatus(request, strClientCode, author);
+    public BatchStatusResponse getBatchStatus( final BatchStatusRequest request, final String strClientCode, final RequestAuthor author )
+            throws IdentityStoreException
+    {
+        return this._transportProvider.getBatchStatus( request, strClientCode, author );
     }
 
 }
