@@ -35,7 +35,6 @@ package fr.paris.lutece.plugins.identityimport.web.rs.service;
 
 import fr.paris.lutece.plugins.identityimport.web.service.IBatchImportTransportProvider;
 import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider;
-import fr.paris.lutece.plugins.identitystore.v3.web.rs.BatchRequestValidator;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
@@ -43,7 +42,6 @@ import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatus
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchStatusResponse;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.util.Constants;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
-import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,11 +51,6 @@ import java.util.Map;
  */
 public class BatchImportTransportRest extends AbstractTransportRest implements IBatchImportTransportProvider
 {
-
-    /**
-     * Logger
-     */
-    private static Logger _logger = Logger.getLogger( BatchImportTransportRest.class );
 
     /** URL for identityStore Import REST service */
     private String _strIdentityStoreImportEndPoint;
