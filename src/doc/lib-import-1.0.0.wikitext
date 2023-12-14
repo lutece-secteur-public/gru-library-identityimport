@@ -1,0 +1,438 @@
+<<<breadcrumb>>>
+
+{{{ page_title | Bibliothèque library-identityimport (V1.0.0) }}}
+
+<<<TOC>>>
+
+La library-identityimport, librairie Lutece, a été développée pour faciliter l'accès au site d'import en masse des identités.
+
+= 1 - Ajout de la dépendance au projet maven =
+Dans le fichier **pom.xml** du projet, rajoutez la dépendance suivante :
+{{{ code |
+<dependency>
+    <groupId>fr.paris.lutece.plugins</groupId>
+    <artifactId>library-identityimport</artifactId>
+    <version>[1.0.0,)</version>
+    <type>jar</type>
+</dependency>
+}}}
+
+= 2 - Configuration du service =
+Pour pouvoir utiliser l'API, le service doit être configuré. Il y a deux façons de configurer ce service : soit par injection de bean dans le contexte, soit directement en Java.
+
+== 2.1 - Configuration par injection de bean dans le contexte ==
+=== Via API Manager ===
+Dans le fichier de contexte du plugin, il faut rajouter les lignes suivantes :
+{{{ code |
+<!-- library identityimport -->
+<bean id="httpAccessTransport-idi" class="fr.paris.lutece.plugins.identityimport.web.rs.service.HttpApiManagerAccessTransport" >
+        <property name="apiEndPointUrl" value="${rest.import.endpoint}"/>
+        <property name="accessManagerEndPointUrl" value="${rest.am.endpoint}"/>
+        <property name="accessManagerCredentials" value="${rest.am.credentials}"/>
+</bean>
+<bean id="restTransport.import.httpAccess" class="fr.paris.lutece.plugins.identityimport.web.rs.service.BatchImportTransportRest">
+    <constructor-arg ref="httpAccessTransport-idi" />
+</bean>
+<!-- BatchService impl -->
+<bean id="batchImportService" class="fr.paris.lutece.plugins.identityimport.web.service.BatchImportService">
+    <constructor-arg ref="restTransport.import.httpAccess"/>
+</bean>
+}}}
+
+URLS de dev :
+* Access Manager : https://gru-gravitee1-am-gateway.dev.apps.paris.mdp/gru-notifications-domain/oauth/token
+* API Manager : https://gru-gravitee1-apim-gateway.dev.apps.paris.mdp/identity/v3
+
+URLS de R7 :
+* Access Manager : https://gru-gravitee-am-gateway.rec.apps.paris.mdp/gru-notifications-domain/oauth/token
+* API Manager : https://gru-gravitee-apim-gateway.rec.apps.paris.mdp/identity/v3
+
+URLS de Prod :
+* Access Manager : https://gru-gravitee-am-gateway.apps.paris.mdp/gru-notifications-domain/oauth/token
+* API Manager : https://gru-gravitee-apim-gateway.apps.paris.mdp/identity/v3
+
+
+=== Accès direct (dev local) ===
+Dans le fichier de contexte du plugin, il faut rajouter les lignes suivantes :
+{{{ code |
+<!-- library identityimport -->
+<bean id="httpAccessTransport-idi" class="fr.paris.lutece.plugins.identityimport.web.rs.service.HttpAccessTransport" >
+        <property name="apiEndPointUrl" value="${rest.import.endpoint}"/>
+</bean>
+<bean id="restTransport.import.httpAccess" class="fr.paris.lutece.plugins.identityimport.web.rs.service.BatchImportTransportRest">
+    <constructor-arg ref="httpAccessTransport-idi" />
+</bean>
+<!-- BatchService impl -->
+<bean id="batchImportService.rest" class="fr.paris.lutece.plugins.identityimport.web.service.BatchImportService">
+    <constructor-arg ref="restTransport.import.httpAccess"/>
+</bean>
+}}}
+
+dans lequel :
+* la valeur de **${rest.import.endpoint}** est l'url locale de l'API identityimport, ex: http://localhost:8080/rest/identitystore
+
+=== Récupération dans l'application ===
+Le bean //batchImportService.rest// est alors disponible dans le contexte du plugin. C'est ce bean qui permet d'interagir avec le site import.
+Dans la suite, on appellera ce bean //batchImportService// pour plus de clarté.
+
+Une référence à ce bean peut être récupérée simplement ainsi :
+{{{ code |
+    import fr.paris.lutece.plugins.identitystore.v3.web.services.BatchImportService;
+    ...
+    private BatchImportService _batchImportService = SpringContextService.getBean( "batchImportService.rest" );
+}}}
+
+== 2.2 - Configuration en Java ==
+Cette section présente un exemple de configuration du service en Java (exemple en utilisant Lutèce).
+{{{ info | Dans cette section, 'myplugin' doit être remplacé par une valeur de votre choix. }}}
+
+=== Via API manager ===
+Dans un fichier **.properties**, ajoutez les clés suivantes :
+{{{ code |
+    myplugin.gru.endpoint.identityimport=<url_to_API_Manager>/identity/v3
+    myplugin.gru.endpoint.token=<url_to_API_Manager>/token
+    myplugin.gru.apimanager.credentials=<private_key>
+}}}
+
+dans lequel :
+* la valeur de **<url_to_API_Manager>** correspond à l'url vers l'API Manager Identity (voir la partie **Les valeurs à paramétrer** dans [[gru_identity]]).
+* la valeur de **<private_key>** correspond à la clé privée de votre application pour l'API Manager Identity.
+
+Dans le code Java, ajoutez les lignes suivantes :
+{{{ code |
+    ...
+    private static final String PROPERTY_GRU_ENDPOINT_IDENTITYIMPORT = "myplugin.gru.endpoint.identityimport";
+    private static final String PROPERTY_GRU_ENDPOINT_TOKEN = "myplugin.gru.endpoint.token";
+    private static final String PROPERTY_GRU_APIMANAGER_CREDENTIALS = "myplugin.gru.apimanager.credentials";
+    ...
+    final HttpApiManagerAccessTransport apiManagerTransport = new HttpApiManagerAccessTransport(  );
+    apiManagerTransport.setApiEndPointUrl( AppPropertiesService.getProperty( PROPERTY_GRU_ENDPOINT_IDENTITYIMPORT ) );
+    apiManagerTransport.setAccessManagerEndPointUrl( AppPropertiesService.getProperty( PROPERTY_GRU_ENDPOINT_TOKEN ) );
+    apiManagerTransport.setAccessManagerCredentials( AppPropertiesService.getProperty( PROPERTY_GRU_APIMANAGER_CREDENTIALS ) );
+
+    final BatchImportTransportRest batchImportTransportRest = BatchImportTransportRest( apiManagerTransport );
+
+    final BatchImportService batchImportService = new BatchImportService( batchImportTransportRest );
+    ...
+}}}
+
+=== Sans API manager ===
+Dans un fichier **.properties**, ajoutez les clés suivantes :
+{{{ code |
+myplugin.gru.endpoint.identitystore=<url_to_API_import>
+}}}
+
+dans lequel :
+* la valeur de **<url_to_API_import>** correspond à l'url vers l'API Identity, ex: http://localhost:8080/rest/identitystore.
+
+Dans le code Java, ajoutez les lignes suivantes :
+{{{ code |
+    ...
+        private static final String PROPERTY_GRU_ENDPOINT_IDENTITYIMPORT = "myplugin.gru.endpoint.identityimport";
+        private static final String PROPERTY_GRU_ENDPOINT_TOKEN = "myplugin.gru.endpoint.token";
+        private static final String PROPERTY_GRU_APIMANAGER_CREDENTIALS = "myplugin.gru.apimanager.credentials";
+        ...
+        final HttpAccessTransport transport = new HttpAccessTransport(  );
+        transport.setApiEndPointUrl( AppPropertiesService.getProperty( PROPERTY_GRU_ENDPOINT_IDENTITYIMPORT ) );
+
+        final BatchImportTransportRest batchImportTransportRest = BatchImportTransportRest( transport );
+
+        final BatchImportService batchImportService = new BatchImportService( batchImportTransportRest );
+        ...
+}}}
+
+Le service //batchImportService// est alors disponible.
+
+= 3 - Utilisation des services  =
+Le service //BatchImportService// permet aux applications de créer et de suivre des lots d'identités à importer. Pour cela il propose les opérations suivantes:
+* Création d'un lot
+* Suivi de l'exécution d'un lot
+
+== 3.1 - Le modèle ==
+Il existe plusieurs objets en fonction de la méthode utilisée.
+
+Pour la création d'un lot :
+* //BatchImportRequest// la requête de création du lot
+* //BatchImportResponse// le résultat de l'exécution de la requête
+
+Pour le suivi d'exécution d'un lot :
+* //BatchStatusRequest// la requête de suivi d'un lot
+* //BatchStatusResponse// le résultat de l'exécution de la requête
+
+=== Les différents objets de requête ===
+
+==== //BatchImportRequest// ====
+La création d'un lot d'import nécessite l'utilisation d'un objet //BatchImportRequest//.
+Cet objet est composé de l'attribut suivant :
+* **batch** : cet objet //BatchDto// représente le lot à créer.
+
+L'objet //BatchDto// est composé des attributs suivants :
+* **user** : le nom de l'utilisateur rattaché au lot d'import (obligatoire).
+* **comment** : le commentaire associé au lot d'import (optionnel).
+* **identities** : une //List<IdentityDto>// des identités candidates du lot d'import.
+
+Il existe des attributs supplémentaires qui ne sont pas utilisés pour une requête de création, et qui ne doivent pas être utilisés.
+* **reference** : l'identifiant du lot d'import, généré à la création.
+* **date** : la date de création du lot d'import, généré à la création.
+
+L'objet //IdentityDto// est composé des attributs suivants :
+* **externalCustomerId** : l'identifiant de l'identité dans le système externe.
+* **attributes** : les attributs de l'identité. Cet objet est une //List<AttributeDto>//.
+
+Il existe des attributs supplémentaires qui ne sont pas utilisés pour une requête de création, et qui ne doivent pas être utilisés. Ces attributs existent pour le scope Identystore.
+* **connectionId** : l'identifiant de connexion de l'identité.
+* **customerId** : l'identifiant de l'identité.
+* **monParisActive** : Flag indiquant si l'identité est connectée.
+* **creationDate** : Date de création de l'identité.
+* **lastUpdateDate** : Date de dernière mise à jour de l'identité.
+* **quality** : Qualité de l'identité. Cet objet est un //QualityDefinition//.
+* **expiration** : Les données d'expiration de l'identité. Cet objet est un //ExpirationDefinition//.
+* **merge** : les données de rapprochement de l'identité. Cet objet est un //MergeDefinition//.
+* **duplicateDefinition** : les données relatives aux doublons. Cet objet est un //IdentityDuplicateDefinition//.
+* **suspicious** : indique si l'identité est suspectée d'être en doublon.
+
+L'objet //AttributeDto// est composé des attributs suivants :
+* **key** : le code de l'attribut
+* **value** : la valeur de l'attribut
+* **certifier** : le code du processus de certification de l'attribut.
+* **certificationDate** : la date de certification de l'attribut.
+
+Il existe des attributs supplémentaires qui ne sont pas utilisés pour une requête de création, et qui ne doivent pas être utilisés. Ces attributs existent pour le scope Identystore.
+* **type** : le type de l'attribut
+* **certificationLevel** : le niveau de certification de l'attribut
+* **lastUpdateDate** : date de dernière mise à jour de l'attribut.
+* **lastUpdateClientCode** : code client ayant réalisé la dernière mise à jour de l'attribut.
+
+==== //BatchStatusRequest// ====
+Le suivi d'exécution d'un lot d'import nécessite l'utilisation d'un objet //BatchStatusRequest//.
+Cet objet est composé des attributs suivants :
+* **batchReference** : la référence du lot d'import dont on veut connaître le status d'exécution.
+* **mode** : le mode de suivi:
+** FULL : toutes les informations disponibles
+** IDENTITIES_ONLY : uniquement les informations des identités
+** BATCH_ONLY : uniquement les informations du lot
+
+=== Les différents objets de réponse ===
+
+==== Les éléments communs ====
+Tous les différents objets de réponse contiennent cet élément commun :
+* **status** : objet //ResponseStatus// contenant les informations concernant l'éxécution de la requête
+
+L'objet //ResponseStatus// est composé des attributs suivants :
+* **httpCode** : le code HTTP de la réponse
+* **message** : message décrivant le status
+* **messageKey** : la clé i18n du message
+* **status** : enum //ResponseStatusType// décrivant le type de status :
+** OK : le status de la réponse est OK (status renvoyé pour les requêtes de type GET et Search)
+** SUCCESS : la réquête a été exécutée avec succès (status renvoyé pour les requêtes ayant un impact sur les données stockées en base de données)
+** INCOMPLETE_SUCCESS : la requête a été exécutée avec succès, avec certaines demandes non traitées (non bloquantes)
+** BAD_REQUEST : la requête n'a pas pu être exécutée car elle est incomplète ou incorrecte
+** UNAUTHORIZED : la requête n'a pas pu être exécutée car l'application ou l'utilisateur a l'origine de la requête n'a pas les droits nécessaires pour effectuer cette opération
+** FAILURE : la requête a échoué
+** NOT_FOUND : la ou les ressources demandées n'ont pas été trouvées
+** CONFLICT : la requête entre en conflit avec l'état de la ressource ou du serveur
+** INTERNAL_SERVER_ERROR : une erreur interne innatendue s'est produite
+
+==== //BatchImportResponse// ====
+La création d'un lot d'import renvoie un objet //BatchImportResponse// qui contient les informations d'exécution de la requête.
+Cet objet est composé des attributs suivants :
+* **status** : objet //ResponseStatus// expliqué précédemment
+* **reference** : l'identifiant unique du lot d'import créé
+
+==== //BatchStatusResponse// ====
+Le suivi de l'exécution d'un lot d'import renvoie un objet //BatchStatusResponse// qui contient des informations et des statistiques.
+
+Cet objet est composé des attributs suivants :
+* **status** : objet //ResponseStatus// expliqué précédemment
+* **batchStatus** : un //BatchStatusDto// contenant les informations de suivi du lot d'import.
+
+L'objet //BatchStatusDto// est composé des attributs suivants :
+* **reference** : la référence unique du lot d'import générée à sa création
+* **clientCode** : le code client utilisé lors de la création du lot d'import
+* **user** : l'utilisateur ayant créé le lot d'import
+* **comment** : le commentaire associé au lot d'import lors de sa création
+* **creationDate** : la date de création du lot d'import
+* **status** : l'état du lot d'import dans son workflow de traitement
+* **statusDescription** : la description de l'état du lot d'import dans son workflow de traitement
+* **statistics** : un objet //BatchStatisticsDto// contenant des statistique sur l'exécution du lot d'import
+* **batchHistory** : une //List<ImportingHistoryDto>// représentant l'historique des changements d'état du lot d'import dans son workflow de traitement
+* **identities** : une //List<CandidateIdentityDto>// contenant les informations de suivi des identités candidates du lot d'import.
+
+L'objet //BatchStatisticsDto// est composé des attributs suivants:
+* **totalResourceCount** : le nombre total d'identités candidates composant le lot d'import
+* **resourceStates** : une //List<BatchResourceStateDto>// décrivant l'ensemble des états possibles d'une identité candidate dans son workflow de traitement
+
+L'objet //BatchResourceStateDto// est composé des attributs suivants:
+* **name** : le nom de l'état du workflow de traitement d'une identité candidate
+* **description** : la description de l'état du workflow de traitement d'une identité candidate
+* **initialState** : indique si c'est l'état initial du workflow de traitement d'une identité candidate
+* **resourceCount** : le nombre total d'identités candidates du lot d'import à cet état
+
+L'objet //CandidateIdentityDto// est composé des attributs suivants :
+* **externalCustomerId** : l'identifiant de l'identité dans le système externe.
+* **customerId** :  l'identifiant de l'identité dans l'Identitystore (optionnel, présent uniquement lorsque l'identité a été insérée).
+* **status** : l'état de l'identité candidate dans son workflow de traitement
+* **statusDescription** : la description de l'état de l'identité candidate dans son workflow de traitement
+* **apiStatus** : le status de retour de l'API Identitystore appelée par la dernière action exécutée dans le workflow de traitement de l'identité candidate (optionnel).
+* **identityHistory** : une //List<ImportingHistoryDto>// représentant l'historique des changements d'état de l'identité candidate dans son workflow de traitement
+
+L'objet //ImportingHistoryDto//  est composé des attributs suivants
+* **actionName** : le nom de l'action réalisée dans le workflow de traitement de l'identité ou du lot
+* **actionDescription** : la description de l'action réalisée dans le workflow de traitement de l'identité ou du lot
+* **date** : la date d'exécution de l'action réalisée dans le workflow de traitement de l'identité ou du lot
+* **userAccessCode** : l'utilisateur ayant déclenché l'action réalisée dans le workflow de traitement de l'identité ou du lot
+Champs spécifiques au workflow de traitement des identités candidates
+* **status** : le status de retour de l'API Identitystore appelée par l'action exécutée dans le workflow de traitement de l'identité candidate (optionnel).
+* **comment** : information complémentaire sur le déroulement de l'action exécutée dans le workflow de traitement de l'identité candidate (optionnel).
+
+=== Signature des requêtes ===
+
+Tous les appels doivent être signés en fournissant l'objet //RequestAuthor// qui est composé des attributs suivants :
+* **name** : le nom de l'auteur
+* **type** : enum //AuthorType// représentant le type d'auteur :
+** owner
+** agent
+** admin
+** application
+
+== 3.2 - Les opérations ==
+{{{ warning |
+    Toutes les opérations nécessitent de fournir le code de l'application appelante dans le but de valider que les requêtes respectent le contrat de service de celle-ci.
+    Par exemple, si lors d'une demande de création d'un lot, l'application n'a pas l'autorisation d'écrire un des attributs spécifiés dans la requête, la demande est rejetée avec un statut retraçant ce défaut. Si ce paramètre n'est pas spécifié dans les appels la librairie retourne une //IdentityStoreException//. Si aucun contrat de service n'est trouvé pour l'application, la librairie renvoie une //IdentityStoreException//.
+}}}
+
+=== Créer un lot d'import ===
+La création d'un lot d'import est réalisée à l'aide du code suivant :
+{{{ code |
+    final BatchImportResponse response = batchImportService.importBatch( importRequest, clientCode, author );
+}}}
+Cette méthode possède trois paramètres :
+* **importRequest** : cet objet //BatchImportRequest// permet la création du lot d'import
+* **clientCode** : le code de l'application cliente
+* **author** : l'auteur de la requête
+
+==== Validation de la requête ====
+Si l'objet //BatchDto// n'est pas présent dans l'objet //BatchImportRequest//, la création est refusée, la librairie retourne une //IdentityStoreException//.
+
+Si l'objet //BatchDto// n'a pas d'identités //IdentityDto//, la création est refusée, la librairie retourne une //IdentityStoreException//.
+
+Si la référence du lot est fournie, la librairie retourne une //IdentityStoreException//.
+
+==== Réponse ====
+La réponse renvoyée par la librairie permet de retracer le déroulement de la création à travers des statuts et des messages.
+
+|= Scénario |= Status |= Code |= Message |
+| La création est acceptée et réalisée sans erreur | ResponseStatusType.SUCCESS | 201 | N/A |
+
+==== Exemple de création et d'envoi d'une requête pour créer un lot d'import ====
+
+{{{ code |
+    final BatchImportRequest request = new BatchImportRequest( );
+    final BatchDto batch = new BatchDto( );
+    request.setBatch( batch );
+    batch.setComment( "Créé automatiquement par un test JUNIT" );
+    batch.setUser( "junit@test.com" );
+
+    final IdentityDto identityDto = new IdentityDto( );
+    batch.getIdentities( ).add( identityDto );
+    identityDto.setExternalCustomerId( "test-junit-1" );
+
+    final AttributeDto gender = new AttributeDto( );
+    identityDto.getAttributes( ).add( gender );
+    gender.setKey( "gender" );
+    gender.setValue( "0" );
+    gender.setCertifier( certificationCode );
+    gender.setCertificationDate( new Date( ) );
+
+    final AttributeDto familyName = new AttributeDto( );
+    identityDto.getAttributes( ).add( familyName );
+    familyName.setKey( "family_name" );
+    familyName.setValue( "Testun" );
+    familyName.setCertifier( certificationCode );
+    familyName.setCertificationDate( new Date( ) );
+
+    final AttributeDto firstName = new AttributeDto( );
+    identityDto.getAttributes( ).add( firstName );
+    firstName.setKey( "first_name" );
+    firstName.setValue( "Robert" );
+    firstName.setCertifier( certificationCode );
+    firstName.setCertificationDate( new Date( ) );
+
+    final AttributeDto birthdate = new AttributeDto( );
+    identityDto.getAttributes( ).add( birthdate );
+    birthdate.setKey( "birthdate" );
+    birthdate.setValue( "11/11/1986" );
+    birthdate.setCertifier( certificationCode );
+    birthdate.setCertificationDate( new Date( ) );
+
+    try {
+        final BatchImportResponse response = batchImportService.importBatch( request, clientCode, getRequestAuthor( ) );
+        switch (response.getStatus().getType()) {
+            case SUCCESS:
+                // do something
+                break;
+            case CONFLICT:
+                // do something
+                break;
+            case FAILURE:
+                //do something
+                break;
+            /** ... **/
+            default:
+                break;
+        }
+    } catch (final IdentityStoreException e) {
+        // handle exception
+    }
+ }}}
+
+=== Suivre le status d'un lot d'import ===
+La récupération du suivi d'un lot d'import est réalisée à l'aide du code suivant :
+ {{{ code |
+     final BatchStatusResponse batchStatus = batchImportService.getBatchStatus( batchStatusRequest, clientCode, author );
+ }}}
+ Cette méthode possède trois paramètres :
+ * **batchStatusRequest** : cet objet //BatchStatusRequest// permet la récupération du suivi du lot d'import
+ * **clientCode** : le code de l'application cliente
+ * **author** : l'auteur de la requête
+
+ ==== Validation de la requête ====
+ Si la référence du lot ou le mode ne sont pas fournis, la librairie retourne une //IdentityStoreException//.
+
+ ==== Réponse ====
+ La réponse renvoyée par la librairie permet de retracer le déroulement de la récupération du suivi du lot à travers des statuts et des messages.
+
+ |= Scénario |= Status |= Code |= Message |
+ | La récupération est acceptée et réalisée sans erreur | ResponseStatusType.OK | 200 | N/A |
+
+ ==== Exemple de création et d'envoi d'une requête pour récupérer le suivi d'un lot d'import ====
+
+ {{{ code |
+     final BatchStatusRequest batchStatusRequest = new BatchStatusRequest( );
+     batchStatusRequest.setBatchReference( "8f594ac2-d63e-4a5d-a7cc-b904ab171818" );
+     batchStatusRequest.setMode( BatchStatusMode.FULL );
+
+     try {
+         final BatchStatusResponse batchStatus = batchImportService.getBatchStatus( batchStatusRequest, clientCode, getRequestAuthor( ) );
+         switch (response.getStatus().getType()) {
+             case SUCCESS:
+                 // do something
+                 break;
+             case CONFLICT:
+                 // do something
+                 break;
+             case FAILURE:
+                 //do something
+                 break;
+             /** ... **/
+             default:
+                 break;
+         }
+     } catch (final IdentityStoreException e) {
+         // handle exception
+     }
+  }}}
+
+
+
+
