@@ -41,15 +41,15 @@ Dans le fichier de contexte du plugin, il faut rajouter les lignes suivantes :
 
 URLS de dev :
 * Access Manager : https://gru-gravitee1-am-gateway.dev.apps.paris.mdp/gru-notifications-domain/oauth/token
-* API Manager : https://gru-gravitee1-apim-gateway.dev.apps.paris.mdp/identity/v3
+* API Manager : https://gru-gravitee1-apim-gateway.dev.apps.paris.mdp/import
 
 URLS de R7 :
 * Access Manager : https://gru-gravitee-am-gateway.rec.apps.paris.mdp/gru-notifications-domain/oauth/token
-* API Manager : https://gru-gravitee-apim-gateway.rec.apps.paris.mdp/identity/v3
+* API Manager : https://gru-gravitee-apim-gateway.rec.apps.paris.mdp/import
 
 URLS de Prod :
 * Access Manager : https://gru-gravitee-am-gateway.apps.paris.mdp/gru-notifications-domain/oauth/token
-* API Manager : https://gru-gravitee-apim-gateway.apps.paris.mdp/identity/v3
+* API Manager : https://gru-gravitee-apim-gateway.apps.paris.mdp/import
 
 
 === Accès direct (dev local) ===
