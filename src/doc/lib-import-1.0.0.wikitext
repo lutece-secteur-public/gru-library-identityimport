@@ -89,7 +89,7 @@ Cette section présente un exemple de configuration du service en Java (exemple 
 === Via API manager ===
 Dans un fichier **.properties**, ajoutez les clés suivantes :
 {{{ code |
-    myplugin.gru.endpoint.identityimport=<url_to_API_Manager>/identity/v3
+    myplugin.gru.endpoint.identityimport=<url_to_API_Manager>/import
     myplugin.gru.endpoint.token=<url_to_API_Manager>/token
     myplugin.gru.apimanager.credentials=<private_key>
 }}}
