@@ -41,13 +41,10 @@ import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.ResponseDto;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.error.ErrorResponse;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.util.Constants;
-import fr.paris.lutece.plugins.identitystore.web.exception.IdentityNotFoundException;
 import fr.paris.lutece.plugins.identitystore.web.exception.IdentityStoreException;
 import fr.paris.lutece.portal.service.util.AppLogService;
 import fr.paris.lutece.util.httpaccess.HttpAccess;
-import fr.paris.lutece.util.httpaccess.InvalidResponseStatus;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.net.URIBuilder;
 
 import javax.ws.rs.core.HttpHeaders;
@@ -289,8 +286,6 @@ public class HttpAccessTransport implements IHttpTransportProvider
      * 
      * @param e
      *            root exception
-     * @throws IdentityNotFoundException
-     *             if the specified Exception is an HttpAccessException with HTTP code 404
      * @throws IdentityStoreException
      *             otherwise
      */
@@ -299,16 +294,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
         String strError = "LibraryIdentityStore - Error HttpAccessTransport :";
         AppLogService.error( strError + e.getMessage( ), e );
 
-        if ( e instanceof InvalidResponseStatus && HttpStatus.SC_NOT_FOUND == ( (InvalidResponseStatus) e ).getResponseStatus( )
-                || e instanceof IdentityNotFoundException )
-        {
-            // throw new IdentityNotFoundException( strError, e );
-            throw new IdentityStoreException( strError, e );
-        }
-        else
-        {
-            throw new IdentityStoreException( strError, e );
-        }
+        throw new IdentityStoreException( strError, e );
     }
 
     /**
