@@ -49,6 +49,7 @@ import org.apache.hc.core5.net.URIBuilder;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -343,8 +344,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
      * @return the desired {@link ResponseDto} subclass instance
      */
     private <T extends ResponseDto> T mapJson( final ObjectMapper mapper, final String jsonStr, final Class<T> responseClass )
-            throws JsonProcessingException, InstantiationException, IllegalAccessException
-    {
+            throws JsonProcessingException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         T response = null;
         try
         {
@@ -357,7 +357,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
             if ( er != null )
             {
                 // If it is an error response, we need to convert it to the desired response class
-                response = responseClass.newInstance( );
+                response = responseClass.getDeclaredConstructor( ).newInstance( );
                 response.setStatus( er.getStatus( ) );
             }
         }
@@ -376,8 +376,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
      * @return a {@link List} of the desired {@link ResponseDto} subclass instances
      */
     private <T extends ResponseDto> List<T> mapJsonList( final ObjectMapper mapper, final String jsonStr, final Class<T> responseClass )
-            throws JsonProcessingException, InstantiationException, IllegalAccessException
-    {
+            throws JsonProcessingException, InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         List<T> responseList = new ArrayList<>( );
         JavaType responseListClassType = mapper.getTypeFactory( ).constructCollectionType( List.class, responseClass );
         try
@@ -396,7 +395,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
                     // If it is an error responseList, we need to convert it to the desired responseList class
                     for ( final ErrorResponse er : errorResponseList )
                     {
-                        final T response = responseClass.newInstance( );
+                        final T response = responseClass.getDeclaredConstructor( ).newInstance( );
                         response.setStatus( er.getStatus( ) );
                         responseList.add( response );
                     }
@@ -409,7 +408,7 @@ public class HttpAccessTransport implements IHttpTransportProvider
                 if ( er != null )
                 {
                     // If it is an error responseList, we need to convert it to the desired responseList class
-                    final T response = responseClass.newInstance( );
+                    final T response = responseClass.getDeclaredConstructor( ).newInstance( );
                     response.setStatus( er.getStatus( ) );
                     responseList.add( response );
                 }
