@@ -35,7 +35,9 @@ package fr.paris.lutece.plugins.identityimport.web.rs.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider;
+
+import fr.paris.lutece.plugins.identitystore.v3.business.IHttpTransportProvider;
+
 
 /**
  *

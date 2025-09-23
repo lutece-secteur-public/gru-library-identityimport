@@ -34,7 +34,7 @@
 package fr.paris.lutece.plugins.identityimport.web.rs.service;
 
 import fr.paris.lutece.plugins.identityimport.web.service.IBatchImportTransportProvider;
-import fr.paris.lutece.plugins.identityimport.web.service.IHttpTransportProvider;
+import fr.paris.lutece.plugins.identitystore.v3.business.IHttpTransportProvider;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.common.RequestAuthor;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportRequest;
 import fr.paris.lutece.plugins.identitystore.v3.web.rs.dto.importing.BatchImportResponse;
